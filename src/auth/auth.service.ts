@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../user/entities/user.entity';
 import { RegisterDto } from '../user/dto/register.dto';
 import { LoginDto } from '../user/dto/login.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -94,5 +95,46 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
     return user;
+  }
+
+  async createUser(createUserDto: CreateUserDto) {
+    const { email, password, fullName, role } = createUserDto;
+
+    // Email mavjudligini tekshirish
+    const existingUser = await this.userModel.findOne({ email });
+    if (existingUser) {
+      throw new BadRequestException('Email already exists');
+    }
+
+    // Parolni hashlash
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Yangi user yaratish
+    const newUser = new this.userModel({
+      email,
+      password: hashedPassword,
+      fullName,
+      role: role || 'user',
+    });
+
+    await newUser.save();
+
+    // JWT token yaratish
+    const token = this.jwtService.sign({
+      sub: newUser._id,
+      email: newUser.email,
+      role: newUser.role,
+    });
+
+    return {
+      message: 'User created successfully',
+      access_token: token,
+      user: {
+        id: newUser._id,
+        email: newUser.email,
+        fullName: newUser.fullName,
+        role: newUser.role,
+      },
+    };
   }
 }
