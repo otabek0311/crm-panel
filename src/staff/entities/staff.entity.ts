@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class Student extends Document {
+export class Staff extends Document {
   @Prop({ required: true })
   firstName: string;
 
@@ -15,20 +15,14 @@ export class Student extends Document {
   @Prop({ required: true })
   phone: string;
 
-  @Prop()
-  groupId: Types.ObjectId;
+  @Prop({ required: true })
+  position: string; // lavozim
 
   @Prop({ default: 'active' })
-  status: string; // active, inactive, graduated
+  status: string; // active, inactive
 
   @Prop()
   address: string;
-
-  @Prop()
-  dateOfBirth: Date;
-
-  @Prop({ default: Date.now })
-  enrollmentDate: Date;
 }
 
-export const StudentSchema = SchemaFactory.createForClass(Student);
+export const StaffSchema = SchemaFactory.createForClass(Staff);

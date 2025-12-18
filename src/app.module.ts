@@ -5,6 +5,11 @@ import { StudentModule } from './student/student.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { BotModule } from './bot/bot.module';
+import { PaymentModule } from './payment/payment.module';
+import { AttendanceModule } from './attendance/attendance.module';
+import { GroupModule } from './group/group.module';
+import { TeacherModule } from './teacher/teacher.module';
+import { StaffModule } from './staff/staff.module';
 
 @Module({
   imports: [
@@ -14,6 +19,11 @@ import { BotModule } from './bot/bot.module';
     AuthModule,
     StudentModule,
     BotModule,
+    PaymentModule,
+    AttendanceModule,
+    GroupModule,
+    TeacherModule,
+    StaffModule,
   ],
   controllers: [],
   providers: [],

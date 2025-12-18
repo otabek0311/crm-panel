@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsString, IsEmail, IsOptional, IsMongoId, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsString, IsEmail, IsOptional } from 'class-validator';
 
-export class CreateStudentDto {
+export class CreateTeacherDto {
   @IsString()
   @IsNotEmpty()
   firstName: string;
@@ -17,9 +17,9 @@ export class CreateStudentDto {
   @IsNotEmpty()
   phone: string;
 
-  @IsMongoId()
+  @IsString()
   @IsOptional()
-  groupId?: string;
+  subject?: string;
 
   @IsString()
   @IsOptional()
@@ -28,12 +28,4 @@ export class CreateStudentDto {
   @IsString()
   @IsOptional()
   address?: string;
-
-  @IsDateString()
-  @IsOptional()
-  dateOfBirth?: Date;
-
-  @IsDateString()
-  @IsOptional()
-  enrollmentDate?: Date;
 }

@@ -23,21 +23,39 @@ export class StudentController {
     return this.studentService.findAll();
   }
 
+  @Get('statistics')
+  @Roles('admin', 'teacher')
+  getStatistics() {
+    return this.studentService.getStatistics();
+  }
+
+  @Get('group/:groupId')
+  @Roles('admin', 'teacher', 'user')
+  findByGroup(@Param('groupId') groupId: string) {
+    return this.studentService.findByGroup(groupId);
+  }
+
+  @Get('status/:status')
+  @Roles('admin', 'teacher')
+  findByStatus(@Param('status') status: string) {
+    return this.studentService.findByStatus(status);
+  }
+
   @Get(':id')
   @Roles('admin', 'teacher', 'user')
   findOne(@Param('id') id: string) {
-    return this.studentService.findOne(+id);
+    return this.studentService.findOne(id);
   }
 
   @Patch(':id')
   @Roles('admin', 'teacher')
   update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
-    return this.studentService.update(+id, updateStudentDto);
+    return this.studentService.update(id, updateStudentDto);
   }
 
   @Delete(':id')
   @Roles('admin')
   remove(@Param('id') id: string) {
-    return this.studentService.remove(+id);
+    return this.studentService.remove(id);
   }
 }

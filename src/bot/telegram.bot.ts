@@ -34,31 +34,24 @@ export class TelegramBotService implements OnModuleInit {
     // /start komandasi uchun handler
     this.bot.onText(/\/start/, async (msg) => {
       const chatId = msg.chat.id;
-      await this.bot.sendMessage(chatId, 'Assalomu alaykum! Xush kelibsiz! Iltimos, ismingizni yuboring:');
-      
-      // Foydalanuvchi holatini saqlash uchun
+      const name = msg.from?.first_name ? `${msg.from.first_name}${msg.from.last_name ? ' ' + msg.from.last_name : ''}` : 'Foydalanuvchi';
+      const username = msg.from?.username || '';
+      await this.bot.sendMessage(chatId, `${name}, muammo yoki savolingizni yozib yuboring:`);
+
+      // Foydalanuvchi birinchi muammoni yuborganda darhol ticket ochiladi
       this.bot.once('message', async (msg) => {
-        const name = msg.text;
-        await this.bot.sendMessage(chatId, `Rahmat, ${name}! Endi elektron pochtangizni yuboring:`);
-        
-        this.bot.once('message', async (msg) => {
-          const email = msg.text;
-          
-          // MongoDB'ga saqlash
-          const ticket = new this.ticketModel({
-            studentId: new Date().getTime().toString(), // Yoki boshqa unique ID
-            studentName: name,
-            studentEmail: email,
-            title: 'Telegram orqali murojaat',
-            description: `Foydalanuvchi Telegram orqali murojaat qildi. Chat ID: ${chatId}`,
-            status: 'open',
-            chatId: chatId.toString()
-          });
-          
-          await ticket.save();
-          
-          await this.bot.sendMessage(chatId, 'Murojaatingiz qabul qilindi! Tez orada siz bilan bog\'lanamiz.');
+        const description = msg.text;
+        const ticket = new this.ticketModel({
+          studentId: chatId.toString(),
+          studentName: name,
+          studentEmail: username ? username + '@telegram' : '',
+          title: 'Telegram orqali murojaat',
+          description,
+          status: 'open',
+          chatId: chatId.toString()
         });
+        await ticket.save();
+        await this.bot.sendMessage(chatId, 'Murojaatingiz qabul qilindi! Tez orada siz bilan bog\'lanamiz.');
       });
     });
 
@@ -66,26 +59,20 @@ export class TelegramBotService implements OnModuleInit {
     this.bot.on('message', async (msg) => {
       if (msg.text && !msg.text.startsWith('/')) {
         const chatId = msg.chat.id;
-        
-        // Agar foydalanuvchi oldin ro'yxatdan o'tgan bo'lsa, yangi ticket yaratamiz
-        const existingTicket = await this.ticketModel.findOne({ chatId: chatId.toString() }).sort({ createdAt: -1 });
-        
-        if (existingTicket) {
-          const newTicket = new this.ticketModel({
-            studentId: existingTicket.studentId,
-            studentName: existingTicket.studentName,
-            studentEmail: existingTicket.studentEmail,
-            title: 'Yangi murojaat',
-            description: msg.text,
-            status: 'open',
-            chatId: chatId.toString()
-          });
-          
-          await newTicket.save();
-          await this.bot.sendMessage(chatId, 'Yangi murojaatingiz qabul qilindi!');
-        } else {
-          await this.bot.sendMessage(chatId, 'Iltimos, avval /start komandasini yuboring!');
-        }
+        // Faqat birinchi marta /start bosilganda ticket ochiladi, boshqa paytlarda faqat yangi ticket ochiladi
+        const name = msg.from?.first_name ? `${msg.from.first_name}${msg.from.last_name ? ' ' + msg.from.last_name : ''}` : 'Foydalanuvchi';
+        const username = msg.from?.username || '';
+        const newTicket = new this.ticketModel({
+          studentId: chatId.toString(),
+          studentName: name,
+          studentEmail: username ? username + '@telegram' : '',
+          title: 'Yangi murojaat',
+          description: msg.text,
+          status: 'open',
+          chatId: chatId.toString()
+        });
+        await newTicket.save();
+        await this.bot.sendMessage(chatId, 'Murojaatingiz qabul qilindi!');
       }
     });
   }
